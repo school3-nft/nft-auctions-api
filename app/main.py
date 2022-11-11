@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from .ledger import generate_ledger_account
+from app.ledger.accounts import generate_ledger_account
 
 
 app = FastAPI()
