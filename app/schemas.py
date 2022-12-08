@@ -6,3 +6,10 @@ class XrplTransfer(BaseModel):
     source_sequence: int
     destination_address: str
     value: float
+
+
+class NFTokenMintData(BaseModel):
+    seed: str
+    sequence: int
+    uri: str
+    transfer_fee: int
