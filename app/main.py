@@ -37,6 +37,14 @@ async def account_data(seed: str, sequence: int):
     return data
 
 
+@app.get('/account-balance')
+async def account_balance(seed: str, sequence: int):
+    data = await accounts.get_ledger_account_data(seed=seed, sequence=sequence)
+    return {
+        'balance': data['account_balance']
+    }
+
+
 @app.get('/account-nfts')
 async def account_nfts(seed: str, sequence: int):
     data = await tokens.get_nfts(seed=seed, sequence=sequence)
