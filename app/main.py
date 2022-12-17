@@ -43,7 +43,7 @@ async def account_nfts(seed: str, sequence: int):
     return data
 
 
-@app.post('/transfer-xrpl')
+@app.post('/transfer-xrp')
 async def transfer_xrpl(transfer: schemas.XrplTransfer):
     response = await transactions.transfer_xrpl(
         source_seed=transfer.source_seed, source_sequence=transfer.source_sequence,
