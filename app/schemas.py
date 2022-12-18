@@ -13,3 +13,11 @@ class NFTokenMintData(BaseModel):
     sequence: int
     uri: str
     transfer_fee: int
+
+
+class NFTokenTransferData(BaseModel):
+    seed: str
+    sequence: int
+    nftoken_id: str
+    amount: int
+    owner: str

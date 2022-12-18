@@ -1,8 +1,9 @@
-from xrpl.models import transactions , requests
+from xrpl.models import transactions, requests, amounts, currencies
 from xrpl.asyncio.clients import AsyncJsonRpcClient
 from xrpl.asyncio import transaction
 from xrpl.wallet import Wallet
 from xrpl.utils.str_conversions import str_to_hex, hex_to_str
+from xrpl.utils import xrp_to_drops
 
 import asyncio
 
@@ -46,6 +47,32 @@ async def get_nfts(seed: str, sequence: int) -> dict:
         'account_nfts': res.to_dict()['result']['account_nfts']
     }
     return response
+
+
+async def transfer_nft(
+    seed: str, sequence: int, owner: str,
+    nftoken_id: str, amount: int
+    ) -> dict:
+    client = AsyncJsonRpcClient(JSON_RPC_URL)
+    wallet = Wallet(seed=seed, sequence=sequence)
+    tx_create_offer = transactions.NFTokenCreateOffer(
+        account=wallet.classic_address,
+        nftoken_id=nftoken_id,
+        amount=xrp_to_drops(amount),
+        owner=owner
+    )
+    tx_res = await transaction.safe_sign_and_submit_transaction(
+        tx_create_offer, wallet, client)
+
+    buy_offers = requests.NFTBuyOffers(
+        nft_id=nftoken_id
+    )
+
+    tx_accept_offer = transactions.NFTokenAcceptOffer(
+        account=owner,
+        nftoken_buy_offer=""
+    )
+    return buy_offers
 
 
 if __name__=="__main__":

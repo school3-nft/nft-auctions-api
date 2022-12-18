@@ -67,3 +67,13 @@ async def mint_nft(mint_data: schemas.NFTokenMintData):
         uri=mint_data.uri, transfer_fee=mint_data.transfer_fee
     )
     return response
+
+
+@app.post('/transfer-nft')
+async def transfer_nft(transfer_data: schemas.NFTokenTransferData):
+    response = await tokens.transfer_nft(
+        seed=transfer_data.seed, sequence=transfer_data.sequence,
+        nftoken_id=transfer_data.nftoken_id, amount=transfer_data.amount,
+        owner=transfer_data.owner
+    )
+    return response
