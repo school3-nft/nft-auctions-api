@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.ledger import accounts, transactions, tokens
@@ -6,6 +6,8 @@ from . import schemas
 
 
 app = FastAPI()
+
+router = APIRouter(prefix='/api')
 
 origins = [
     "*"
@@ -20,24 +22,24 @@ app.add_middleware(
 )
 
 
-@app.get('/')
+@router.get('/')
 async def hello():
     return {'msg': 'Hello!'}
 
 
-@app.get('/create-user')
+@router.get('/create-user')
 async def create_user():
     account_info = await accounts.generate_ledger_account()
     return account_info
 
 
-@app.get('/account-data')
+@router.get('/account-data')
 async def account_data(seed: str, sequence: int):
     data = await accounts.get_ledger_account_data(seed=seed, sequence=sequence)
     return data
 
 
-@app.get('/account-balance')
+@router.get('/account-balance')
 async def account_balance(seed: str, sequence: int):
     data = await accounts.get_ledger_account_data(seed=seed, sequence=sequence)
     return {
@@ -45,13 +47,13 @@ async def account_balance(seed: str, sequence: int):
     }
 
 
-@app.get('/account-nfts')
+@router.get('/account-nfts')
 async def account_nfts(seed: str, sequence: int):
     data = await tokens.get_nfts(seed=seed, sequence=sequence)
     return data
 
 
-@app.post('/transfer-xrp')
+@router.post('/transfer-xrp')
 async def transfer_xrpl(transfer: schemas.XrplTransfer):
     response = await transactions.transfer_xrpl(
         source_seed=transfer.source_seed, source_sequence=transfer.source_sequence,
@@ -60,7 +62,7 @@ async def transfer_xrpl(transfer: schemas.XrplTransfer):
     return response
     
 
-@app.post('/mint-nft')
+@router.post('/mint-nft')
 async def mint_nft(mint_data: schemas.NFTokenMintData):
     response = await tokens.mint_nft(
         seed=mint_data.seed, sequence=mint_data.sequence,
@@ -69,7 +71,7 @@ async def mint_nft(mint_data: schemas.NFTokenMintData):
     return response
 
 
-@app.post('/transfer-nft')
+@router.post('/transfer-nft')
 async def transfer_nft(transfer_data: schemas.NFTokenTransferData):
     response = await tokens.transfer_nft(
         seed=transfer_data.seed, sequence=transfer_data.sequence,
@@ -77,3 +79,5 @@ async def transfer_nft(transfer_data: schemas.NFTokenTransferData):
         owner=transfer_data.owner
     )
     return response
+
+app.include_router(router)
