@@ -5,7 +5,9 @@ from app.ledger import accounts, transactions, tokens
 from . import schemas
 
 
-app = FastAPI(docs_url='/api/docs')
+app = FastAPI(
+    docs_url='/api/docs',
+    root_path='/api/')
 
 router = APIRouter(prefix='/api')
 
