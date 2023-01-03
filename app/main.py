@@ -6,8 +6,8 @@ from . import schemas
 
 
 app = FastAPI(
-    docs_url='/api/docs',
-    root_path='/api/')
+    docs_url='/api/docs',)
+    #root_path='/api/')
 
 router = APIRouter(prefix='/api')
 
