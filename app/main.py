@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.ledger import accounts, transactions, tokens
@@ -25,8 +25,11 @@ app.add_middleware(
 
 
 @router.get('/')
-async def hello():
-    return {'msg': 'Hello!'}
+async def hello(request: Request):
+    return {
+        'msg': 'Hello!',
+        'root_path': request.scope.get('root_path')
+        }
 
 
 @router.get('/create-user')
