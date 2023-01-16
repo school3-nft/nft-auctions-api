@@ -5,15 +5,12 @@ from xrpl.wallet import Wallet
 from xrpl.utils.str_conversions import str_to_hex, hex_to_str
 from xrpl.utils import xrp_to_drops
 
-import asyncio
-
-
 JSON_RPC_URL = "https://s.altnet.rippletest.net:51234/"
 
 async def mint_nft(
     seed: str, sequence: int, uri: str, transfer_fee: int
     ) -> dict:
-    client = AsyncJsonRpcClient(JSON_RPC_URL)
+    client =  AsyncJsonRpcClient(JSON_RPC_URL)
     wallet = Wallet(seed=seed, sequence=sequence)
     tx_mint_nft = transactions.NFTokenMint(
         account=wallet.classic_address,
@@ -22,11 +19,14 @@ async def mint_nft(
         transfer_fee=transfer_fee,
         nftoken_taxon=0,
         sequence=sequence,
-        fee="0"
+        fee="10"
     )
-    tx_res = await transaction.safe_sign_and_submit_transaction(
+    # transaction
+
+    tx_mint_signed = await transaction.safe_sign_and_submit_transaction(
         tx_mint_nft, wallet, client)
-    res_data = tx_res.to_dict()
+
+    res_data = tx_mint_signed.to_dict()
     response = {
         'status': res_data['status'],
         'fee': res_data['result']['tx_json']['Fee'],
