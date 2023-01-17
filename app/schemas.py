@@ -16,8 +16,9 @@ class NFTokenMintData(BaseModel):
 
 
 class NFTokenTransferData(BaseModel):
-    seed: str
-    sequence: int
+    seller_seed: str
+    seller_sequence: int
+    buyer_seed: str
+    buyer_sequence: int
     nftoken_id: str
     amount: int
-    owner: str

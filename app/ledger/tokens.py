@@ -21,7 +21,6 @@ async def mint_nft(
         sequence=sequence,
         fee="10"
     )
-    # transaction
 
     tx_mint_signed = await transaction.safe_sign_and_submit_transaction(
         tx_mint_nft, wallet, client)
@@ -50,33 +49,47 @@ async def get_nfts(seed: str, sequence: int) -> dict:
 
 
 async def transfer_nft(
-    seed: str, sequence: int, owner: str,
+    seller_seed: str, seller_sequence: int,
+    buyer_seed: str, buyer_sequence: int,
     nftoken_id: str, amount: int
     ) -> dict:
     client = AsyncJsonRpcClient(JSON_RPC_URL)
-    wallet = Wallet(seed=seed, sequence=sequence)
-    tx_create_offer = transactions.NFTokenCreateOffer(
-        account=wallet.classic_address,
+    seller_wallet = Wallet(seed=seller_seed, sequence=seller_sequence)
+    buyer_wallet = Wallet(seed=buyer_seed, sequence=buyer_sequence)
+    tx_create_sell_offer = transactions.NFTokenCreateOffer(
+        account=seller_wallet.classic_address,
+        flags=0x00000001,
         nftoken_id=nftoken_id,
         amount=xrp_to_drops(amount),
-        owner=owner
+        destination=buyer_wallet.classic_address
     )
-    tx_res = await transaction.safe_sign_and_submit_transaction(
-        tx_create_offer, wallet, client)
+    tx_create_buy_offer = transactions.NFTokenCreateOffer(
+        account=buyer_wallet.classic_address,
+        nftoken_id=nftoken_id,
+        amount=xrp_to_drops(amount),
+        owner=seller_wallet.classic_address
+    )
+    sell_tx_res = await transaction.safe_sign_and_submit_transaction(
+        tx_create_sell_offer, seller_wallet, client)
+    buy_tx_res = await transaction.safe_sign_and_submit_transaction(
+        tx_create_buy_offer, buyer_wallet, client)
 
-    buy_offers = requests.NFTBuyOffers(
+    offers_req = requests.NFTBuyOffers(
         nft_id=nftoken_id
     )
+    offers_res = await client.request(offers_req)
 
-    tx_accept_offer = transactions.NFTokenAcceptOffer(
-        account=owner,
-        nftoken_buy_offer=""
+    tx_seller_accept_offer = transactions.NFTokenAcceptOffer(
+        account=seller_wallet.classic_address,
+        nftoken_buy_offer=offers_res.to_dict()['result']['offers'][0]['nft_offer_index']
     )
-    return buy_offers
+    tx_buyer_accept_offer = transactions.NFTokenAcceptOffer(
+        account=buyer_wallet.classic_address,
+        nftoken_sell_offer=offers_res.to_dict()['result']['offers'][0]['nft_offer_index']
+    )
+    seller_accept_res = await transaction.safe_sign_and_submit_transaction(
+        tx_seller_accept_offer, seller_wallet, client)
+    buyer_accept_res = await transaction.safe_sign_and_submit_transaction(
+        tx_buyer_accept_offer, buyer_wallet, client)
 
-
-if __name__=="__main__":
-    nfts = asyncio.run(mint_nft("sEdTKSzXHhRAJBTogYJ6brHkWjL6Ria", 33501756, "https://ipfs.io/ipfs/QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR", 5000))
-    print(nfts)
-    #res = asyncio.run(get_nfts("sEdTKSzXHhRAJBTogYJ6brHkWjL6Ria", 33501756))
-    #print(res)
+    return buyer_accept_res
