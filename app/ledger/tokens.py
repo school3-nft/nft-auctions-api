@@ -27,11 +27,25 @@ async def mint_nft(
         tx_mint_nft, wallet, client)
 
     res_data = tx_mint_signed.to_dict()
+
+    nfts_req = requests.AccountNFTs(
+        account=wallet.classic_address
+    )
+
+    nfts_res = await client.request(nfts_req)
+    nfts_data = nfts_res.to_dict()['result']['account_nfts']
+    nftoken_id = ""
+    for nft in nfts_data:
+        if nft['URI'] == res_data['result']['tx_json']['URI']:
+            nftoken_id = nft['NFTokenID']
+
     response = {
         'status': res_data['status'],
         'fee': res_data['result']['tx_json']['Fee'],
-        'uri': hex_to_str(res_data['result']['tx_json']['URI']),
+        'ipfs': hex_to_str(res_data['result']['tx_json']['URI']),
+        'uri': res_data['result']['tx_json']['URI'],
         'hash': res_data['result']['tx_json']['hash'],
+        'nftoken_id': nftoken_id
     }
     return response
 
