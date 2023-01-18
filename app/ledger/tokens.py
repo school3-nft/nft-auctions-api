@@ -5,6 +5,7 @@ from xrpl.wallet import Wallet
 from xrpl.utils.str_conversions import str_to_hex, hex_to_str
 from xrpl.utils import xrp_to_drops
 
+
 JSON_RPC_URL = "https://s.altnet.rippletest.net:51234/"
 
 async def mint_nft(
@@ -92,4 +93,8 @@ async def transfer_nft(
     buyer_accept_res = await transaction.safe_sign_and_submit_transaction(
         tx_buyer_accept_offer, buyer_wallet, client)
 
-    return buyer_accept_res
+    response = {
+        'status': buyer_accept_res.to_dict()['status'],
+    }
+
+    return response
